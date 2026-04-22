@@ -3,18 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Camp;
+use App\Models\User;
+use App\Models\Supporter;
+use App\Models\Message;
+use App\Models\RegistrationRequest;
 use Illuminate\Http\Request;
 
 class CampController extends Controller
 {
+    private function getSharedData()
+    {
+        return [
+            'campsCount' => Camp::count(),
+            'adminsCount' => User::where('role', 'admin')->count(),
+            'representativesCount' => User::where('role', 'representative')->count(),
+            'dataEntriesCount' => User::where('role', 'data_entry')->count(),
+            'supportersCount' => Supporter::count(),
+            'messagesCount' => Message::count(),
+            'camps' => Camp::all(),
+            'requests' => RegistrationRequest::latest('created_at')->get(),
+            'messages' => Message::latest('created_at')->get(),
+        ];
+    }
+
     public function index()
     {
-        $camps = Camp::latest()->get();
+        $data = $this->getSharedData();
+        $data['section'] = 'camps';
 
-        return view('dashboard.dashboard', [
-            'section' => 'camps',
-            'camps' => $camps
-        ]);
+        return view('dashboard.dashboard', $data);
+    }
+
+    public function show($id)
+    {
+        $data = $this->getSharedData();
+        $data['selectedCamp'] = Camp::findOrFail($id);
+        $data['section'] = 'camps';
+        $data['subsection'] = 'show-camp';
+
+        return view('dashboard.dashboard', $data);
     }
 
     public function create()
@@ -25,11 +52,11 @@ class CampController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required',
-            'governorate' => 'required',
-            'location' => 'required',
-            'families_count' => 'required',
-            'status' => 'required|in:active,inactive'
+            'name' => 'required|string|max:255',
+            'governorate' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'families_count' => 'required|integer|min:0',
+            'status' => 'required|in:active,inactive',
         ]);
 
         Camp::create($validated);
@@ -37,49 +64,37 @@ class CampController extends Controller
         return redirect()->route('camps.index')->with('success', 'تمت الإضافة');
     }
 
-    public function show(Camp $camp)
+    public function edit($id)
     {
-        $camps = Camp::latest()->get();
+        $data = $this->getSharedData();
+        $data['selectedCamp'] = Camp::findOrFail($id);
+        $data['section'] = 'camps';
+        $data['subsection'] = 'edit-camp';
 
-        return view('dashboard.dashboard', [
-            'section' => 'camps',
-            'subsection' => 'show-camp',
-            'selectedCamp' => $camp,
-            'camps' => $camps,
-        ]);
+        return view('dashboard.dashboard', $data);
     }
 
-    public function edit(Camp $camp)
+    public function update(Request $request, $id)
     {
-        $camps = Camp::latest()->get();
+        $camp = Camp::findOrFail($id);
 
-        return view('dashboard.dashboard', [
-            'section' => 'camps',
-            'subsection' => 'edit-camp',
-            'selectedCamp' => $camp,
-            'camps' => $camps,
-        ]);
-    }
-
-    public function update(Request $request, Camp $camp)
-    {
         $validated = $request->validate([
-            'name' => 'required',
-            'governorate' => 'required',
-            'location' => 'required',
-            'families_count' => 'required',
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'governorate' => 'required|string|max:255',
+            'families_count' => 'required|integer|min:0',
             'status' => 'required|in:active,inactive',
         ]);
 
         $camp->update($validated);
 
-        return redirect()->route('camps.index')->with('success', 'تم التعديل بنجاح');
+        return redirect()->route('camps.index')->with('success', 'تم تحديث المخيم بنجاح');
     }
 
     public function destroy(Camp $camp)
     {
         $camp->delete();
 
-        return back()->with('success', 'تم الحذف');
+        return redirect()->route('camps.index')->with('success', 'تم الحذف');
     }
 }

@@ -106,7 +106,12 @@
               منصة خيمتي لإدارة المخيمات والمستفيدين، <br />والمساعدات بيسر
               وأمان.
             </p>
-            <button class="btn  rounded-pill px-5" style="border-color: rgba(58, 45, 153, 0.38);color: #342daa">الانضمام</button>
+            <a href="{{ route('join') }}" 
+   class="btn rounded-pill px-5" 
+   style="border-color: rgba(58, 45, 153, 0.38); color: #342daa">
+   الانضمام
+</a>
+            <!-- <button href="{{ route('join') }}" class="btn  rounded-pill px-5" style="border-color: rgba(58, 45, 153, 0.38);color: #342daa">الانضمام</button> -->
           </div>
           <div class="col-lg-6">
             <img src="{{ asset('assets/images/img1 (1).jpeg') }}" class="img-fluid rounded-4" />
@@ -127,7 +132,7 @@
           <div class="col-lg-6" id="us">
             <h2 class="fw-bold mb-3">من نحن؟</h2>
             <p>
-              منصة دكية وانسانية للإدارة مخيمات النزوح،تعمل على تنظيم بيانات<br />
+              منصة ذكية وانسانية للإدارة مخيمات النزوح،تعمل على تنظيم بيانات<br />
               المستفيدين تنسيق الانشطة،وادارة المساعدات بسهولة وسرعة وشفافية.<br />
               هدفنا خلق مساحة أكثر امانا واستقرارا داخل المخيمات من خلال نظام<br />
               مبسط يدعم الفرق العاملة ويضمن وصول الخدمات لكل من يحتاجها.
