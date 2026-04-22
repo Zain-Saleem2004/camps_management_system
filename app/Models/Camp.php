@@ -17,4 +17,14 @@ class Camp extends Model
     ];
 
     public $timestamps = false;
+
+    public function representative()
+    {
+        return $this->hasOne(Representative::class);
+    }
+
+    public function dataEntry()
+    {
+        return $this->hasOne(DataEntry::class);
+    }
 }

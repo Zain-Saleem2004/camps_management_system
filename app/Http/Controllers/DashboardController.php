@@ -42,6 +42,19 @@ class DashboardController extends Controller
         ));
     }
 
+    public function usersIndex()
+    {
+        $users = User::all();
+
+        return view('dashboard.dashboard', array_merge(
+            $this->dashboardData(),
+            [
+                'section' => 'users',
+                'users' => $users,
+            ]
+        ));
+    }
+
     public function messagesIndex()
     {
         return view('dashboard.dashboard', array_merge(

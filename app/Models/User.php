@@ -29,4 +29,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'is_active',
+        'phone',
+    ];
+
+    public function representative()
+    {
+        return $this->hasOne(Representative::class);
+    }
+
+    public function dataEntry()
+    {
+        return $this->hasOne(DataEntry::class);
+    }
+
+    public function adminProfile()
+    {
+        return $this->hasOne(Admins::class);
+    }
 }

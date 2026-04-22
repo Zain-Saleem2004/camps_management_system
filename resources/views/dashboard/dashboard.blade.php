@@ -26,22 +26,23 @@
             <img src="{{ asset('assets/images/img1__5_-removebg-preview (1).png') }}" alt="Logo">
         </div>
         <nav class="mt-4">
-            <a href="{{ route('dashboard') }}"
-                class="nav-link {{ (($section ?? '') == 'dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ (($section ?? '') == 'dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid"></i> لوحة التحكم
             </a>
-            <a href="{{ route('camps.index') }}"
-                class="nav-link {{ (($section ?? '') == 'camps') ? 'active' : '' }}">
+            <a href="{{ route('camps.index') }}" class="nav-link {{ (($section ?? '') == 'camps') ? 'active' : '' }}">
                 <i class="bi bi-houses"></i> المخيمات
             </a>
-            <a href="{{ route('requests.index') }}" class="nav-link {{ (($section ?? '') == 'requests') ? 'active' : '' }}">
+            <a href="{{ route('requests.index') }}"
+                class="nav-link {{ (($section ?? '') == 'requests') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i> الطلبات
             </a>
             <div class="nav-link" onclick="showPage('reports', this)"><i class="bi bi-file-earmark-bar-graph"></i>
                 التقارير</div>
             <div class="nav-link" onclick="showPage('institutionsSection', this)"><i class="bi bi-building"></i>
                 المؤسسات</div>
-            <div class="nav-link" onclick="showPage('users', this)"><i class="bi bi-person-check"></i> المستخدمين</div>
+            <a href="{{ route('users.index') }}" class="nav-link {{ (($section ?? '') == 'users') ? 'active' : '' }}">
+                <i class="bi bi-person-check"></i> المستخدمين
+            </a>
             <div class="nav-link" onclick="showPage('contact', this)"><i class="bi bi-people"></i> التواصل</div>
             <a href="{{ route('messages.index') }}"
                 class="nav-link {{ (($section ?? '') == 'messages' || ($section ?? '') == 'message-details') ? 'active' : '' }}">
@@ -115,6 +116,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>اسم المخيم</th>
+                                <th>اسم المندوب</th>
                                 <th>العنوان</th>
                                 <th>المحافظة</th>
                                 <th>عدد العائلات</th>
@@ -127,6 +129,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $camp->name }}</td>
+                                <td>{{ $camp->representative?->name ?? 'لا يوجد مندوب' }}</td>
                                 <td>{{ $camp->location }}</td>
                                 <td>{{ $camp->governorate }}</td>
                                 <td>{{ $camp->families_count }}</td>
@@ -143,13 +146,14 @@
                                     <i class="bi bi-shield-lock text-dark mx-1" style="cursor:pointer"
                                         data-bs-toggle="modal" data-bs-target="#authModal"></i>
 
-                                    <i class="bi bi-bar-chart text-info mx-1" style="cursor:pointer"
-                                        onclick="showPage('delegate-form')"></i>
+                                    <a href="{{ route('representatives.showByCamp', $camp->id) }}">
+                                        <i class="bi bi-bar-chart text-info mx-1" style="cursor:pointer"></i>
+                                    </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6">لا توجد مخيمات</td>
+                                <td colspan="8">لا توجد مخيمات</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -164,35 +168,48 @@
                     <div class="row align-items-center mb-3">
                         <div class="col-3 text-start"><label>اسم المخيم</label></div>
                         <div class="col-9">
-                            <input type="text" class="form-control form-control-custom" value="{{ $selectedCamp->name }}" readonly>
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->name }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-3">
+                        <div class="col-3 text-start"><label>اسم المندوب</label></div>
+                        <div class="col-9">
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->representative?->name ?? 'لا يوجد مندوب' }}" readonly>
                         </div>
                     </div>
 
                     <div class="row align-items-center mb-3">
                         <div class="col-3 text-start"><label>العنوان</label></div>
                         <div class="col-9">
-                            <input type="text" class="form-control form-control-custom" value="{{ $selectedCamp->location }}" readonly>
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->location }}" readonly>
                         </div>
                     </div>
 
                     <div class="row align-items-center mb-3">
                         <div class="col-3 text-start"><label>المحافظة</label></div>
                         <div class="col-9">
-                            <input type="text" class="form-control form-control-custom" value="{{ $selectedCamp->governorate }}" readonly>
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->governorate }}" readonly>
                         </div>
                     </div>
 
                     <div class="row align-items-center mb-3">
                         <div class="col-3 text-start"><label>عدد العائلات</label></div>
                         <div class="col-9">
-                            <input type="number" class="form-control form-control-custom" value="{{ $selectedCamp->families_count }}" readonly>
+                            <input type="number" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->families_count }}" readonly>
                         </div>
                     </div>
 
                     <div class="row align-items-center mb-3">
                         <div class="col-3 text-start"><label>الحالة</label></div>
                         <div class="col-9">
-                            <input type="text" class="form-control form-control-custom" value="{{ $selectedCamp->status }}" readonly>
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->status }}" readonly>
                         </div>
                     </div>
 
@@ -213,29 +230,41 @@
                     <div class="row g-3 mx-auto" style="max-width: 800px;">
                         <div class="col-md-6">
                             <label class="mb-2">اسم المخيم</label>
-                            <input type="text" name="name" class="form-control form-control-custom" value="{{ $selectedCamp->name }}">
+                            <input type="text" name="name" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->name }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="mb-2">اسم المندوب</label>
+                            <input type="text" class="form-control form-control-custom" 2
+                                value="{{ $selectedCamp->representative?->name ?? 'لا يوجد مندوب' }}" readonly>
                         </div>
 
                         <div class="col-md-6">
                             <label class="mb-2">المحافظة</label>
-                            <input type="text" name="governorate" class="form-control form-control-custom" value="{{ $selectedCamp->governorate }}">
+                            <input type="text" name="governorate" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->governorate }}">
                         </div>
 
                         <div class="col-md-6">
                             <label class="mb-2">العنوان</label>
-                            <input type="text" name="location" class="form-control form-control-custom" value="{{ $selectedCamp->location }}">
+                            <input type="text" name="location" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->location }}">
                         </div>
 
                         <div class="col-md-6">
                             <label class="mb-2">عدد العائلات</label>
-                            <input type="number" name="families_count" class="form-control form-control-custom" value="{{ $selectedCamp->families_count }}">
+                            <input type="number" name="families_count" class="form-control form-control-custom"
+                                value="{{ $selectedCamp->families_count }}">
                         </div>
 
                         <div class="col-md-6">
                             <label class="mb-2">الحالة</label>
                             <select name="status" class="form-select form-control-custom">
-                                <option value="active" {{ $selectedCamp->status == 'active' ? 'selected' : '' }}>active</option>
-                                <option value="inactive" {{ $selectedCamp->status == 'inactive' ? 'selected' : '' }}>inactive</option>
+                                <option value="active" {{ $selectedCamp->status == 'active' ? 'selected' : '' }}>active
+                                </option>
+                                <option value="inactive" {{ $selectedCamp->status == 'inactive' ? 'selected' : '' }}>
+                                    inactive</option>
                             </select>
                         </div>
 
@@ -247,8 +276,14 @@
                 @endif
             </div>
 
-            <div id="delegate-upload" class="page-section">
-
+            <div id="delegate-upload"
+                class="page-section {{ (($subsection ?? '') == 'delegate-upload') ? 'active' : '' }}">
+                @if(isset($representative))
+                @if(!$representative)
+                <div class="alert alert-warning text-center">
+                    لا يوجد مندوب لهذا المخيم
+                </div>
+                @endif
 
                 <div class="form-container">
                     <h4 class="form-title">تسجيل بيانات مندوب المخيم</h4>
@@ -258,16 +293,20 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>الاسم</label>
-                                    <input type="text" class="form-control" placeholder="أدخل الاسم">
+                                    <input type="text" class="form-control" value="{{ $representative->name ?? '' }}"
+                                        readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>الجنس</label>
-                                    <select class="form-select">
+                                    <!-- <select class="form-select">
                                         <option selected disabled>اختر</option>
                                         <option value="male">ذكر</option>
                                         <option value="female">أنثى</option>
+                                    </select> -->
+                                    <select class="form-select" disabled>
+                                        <option>{{ $representative->gender ?? '---' }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -287,7 +326,9 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>رقم الهوية</label>
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control"
+                                        value="{{ $representative->national_id_no ?? '' }}" readonly>
+                                    <!-- <input type="text" class="form-control"> -->
                                 </div>
                             </div>
 
@@ -295,15 +336,18 @@
                                 <div class="form-group-custom">
                                     <label>الهاتف</label>
                                     <div class="input-group">
-
-                                        <input type="number" class="form-control">
+                                        <input type="text" class="form-control"
+                                            value="{{ $representative->phone ?? '' }}" readonly>
+                                        <!-- <input type="number" class="form-control"> -->
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>البريد الالكتروني</label>
-                                    <input type="email" class="form-control">
+                                    <input type="text" class="form-control" value="{{ $representative->email ?? '' }}"
+                                        readonly>
+                                    <!-- <input type="email" class="form-control"> -->
                                 </div>
                             </div>
 
@@ -334,14 +378,18 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-save">حفظ</button>
+                        <div class="text-center mt-4">
+                            <a href="{{ route('camps.index') }}" class="btn btn-save">رجوع</a>
+                        </div>
                     </form>
                 </div>
+                @endif
 
 
             </div>
 
-            <div id="requests" class="page-section {{ (($section ?? '') == 'requests' && ($subsection ?? '') != 'show-request') ? 'active' : '' }}">
+            <div id="requests"
+                class="page-section {{ (($section ?? '') == 'requests' && ($subsection ?? '') != 'show-request') ? 'active' : '' }}">
                 <h4 class="text-center mb-4 fw-bold">طلبات الانضمام</h4>
                 <div class="custom-table table-responsive">
                     <table class="table text-center align-middle mb-0">
@@ -387,26 +435,26 @@
 
                             <div class="col-md-6">
                                 <label>اسم المخيم</label>
-                                <input type="text" class="form-control" value="{{ $selectedRequest->camp_name }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="text" class="form-control" value="{{ $selectedRequest->camp_name }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div class="col-md-6">
                                 <label>العنوان</label>
-                                <input type="text" class="form-control" value="{{ $selectedRequest->location }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="text" class="form-control" value="{{ $selectedRequest->location }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div class="col-md-6">
                                 <label>المحافظة</label>
-                                <input type="text" class="form-control" value="{{ $selectedRequest->governorate }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="text" class="form-control" value="{{ $selectedRequest->governorate }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div class="col-md-6">
                                 <label>عدد العائلات</label>
-                                <input type="number" class="form-control" value="{{ $selectedRequest->families_count }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="number" class="form-control" value="{{ $selectedRequest->families_count }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div>
@@ -415,8 +463,8 @@
 
                             <div class="col-md-6">
                                 <label>الاسم</label>
-                                <input type="text" class="form-control" value="{{ $selectedRequest->rep_name }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="text" class="form-control" value="{{ $selectedRequest->rep_name }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div class="col-md-6">
@@ -433,8 +481,8 @@
 
                             <div class="col-md-6">
                                 <label>رقم الهوية</label>
-                                <input type="text" class="form-control" value="{{ $selectedRequest->national_id_no }}" readonly
-                                    style="border-radius: 19px; margin-top: 10px;">
+                                <input type="text" class="form-control" value="{{ $selectedRequest->national_id_no }}"
+                                    readonly style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
                             <div class="col-md-6">
@@ -622,16 +670,20 @@
             </div>
 
 
-            <div id="users" class="page-section">
+            <div id="users" class="page-section {{ (($section ?? '') == 'users') ? 'active' : '' }}">
                 <h4 class="text-center mb-4 fw-bold">المستخدمين</h4>
+
                 <div class="d-flex justify-content-center mb-4">
                     <div class="input-group" style="max-width: 500px;">
                         <input type="text" id="idSearch" class="form-control shadow-none" placeholder="ادخل رقم الهوية"
                             style="border-radius: 0 25px 25px 0;">
-                        <button class="btn btn-white border" style="border-radius: 25px 0 0 25px;"><i
-                                class="bi bi-search"></i></button>
+                        <button onclick="searchById()" class="btn btn-white border"
+                            style="border-radius: 25px 0 0 25px;">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </div>
                 </div>
+
                 <div class="custom-table table-responsive">
                     <table class="table text-center align-middle mb-0" id="userTable">
                         <thead>
@@ -640,32 +692,108 @@
                                 <th>الإسم</th>
                                 <th>اسم المخيم</th>
                                 <th>الدور</th>
-                                <th>.....</th>
+                                <th>الحالة</th>
                                 <th>العملية</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-id="123456789">
-                                <td>1</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                            @forelse($users ?? [] as $user)
+                            <tr data-id="
+                            @if($user->role === 'representative')
+                                {{ $user->representative?->national_id_no }}
+                            @elseif($user->role === 'data_entry')
+                                {{ $user->dataEntry?->national_id_no }}
+                            @elseif($user->role === 'admin')
+                                {{ $user->adminProfile?->national_id_no }}
+                            @else
+                                ''
+                            @endif
+                        ">
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $user->name }}</td>
                                 <td>
-                                    <div class="form-check form-switch d-inline-block"><input class="form-check-input"
-                                            type="checkbox" checked></div>
+                                    @if($user->role === 'representative')
+                                    {{ $user->representative?->camp?->name ?? '---' }}
+                                    @elseif($user->role === 'data_entry')
+                                    {{ $user->dataEntry?->camp?->name ?? '---' }}
+                                    @else
+                                    ---
+                                    @endif
+                                </td>
+                                <td>{{ $user->role }}</td>
+                                <td>
+                                    <form action="{{ route('users.toggle-status', $user->id) }}" method="POST"
+                                        class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <div class="form-check form-switch d-inline-block">
+                                            <input class="form-check-input" type="checkbox"
+                                                {{ $user->is_active ? 'checked' : '' }} onchange="this.form.submit()">
+                                        </div>
+                                    </form>
                                 </td>
                                 <td>
+                                    <a href="{{ route('users.password.form', $user->id) }}">
+                                        <i class="bi bi-shield-lock text-dark mx-1 fs-5" style="cursor:pointer"></i>
+                                    </a>
 
-                                    <i class="bi bi-shield-lock text-dark mx-1 fs-5" style="cursor:pointer"
-                                        data-bs-toggle="modal" data-bs-target="#authModal"></i>
-                                    <i class="bi bi-trash text-danger mx-1 fs-5" style="cursor:pointer"
-                                        onclick="deleteRow(this)"></i>
+                                    <!-- <form action="{{ route('users.toggle-status', $user->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="border-0 bg-transparent p-0">
+                                            <i class="bi bi-trash text-danger mx-1 fs-5" style="cursor:pointer"></i>
+                                        </button>
+                                    </form> -->
                                 </td>
                             </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6">لا يوجد مستخدمون</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            <div id="change-user-password"
+                class="page-section {{ (($subsection ?? '') == 'change-user-password') ? 'active' : '' }}">
+                <h4 class="text-center mb-5 fw-bold">تغيير كلمة السر</h4>
+
+                @if(isset($selectedUser))
+                <div class="mx-auto" style="max-width: 600px;">
+                    <form action="{{ route('users.password.update', $selectedUser->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="mb-3">
+                            <label class="mb-2">اسم المستخدم</label>
+                            <input type="text" class="form-control form-control-custom"
+                                value="{{ $selectedUser->name }}" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="mb-2">كلمة السر الجديدة</label>
+                            <input type="password" name="password" class="form-control form-control-custom">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="mb-2">تأكيد كلمة السر</label>
+                            <input type="password" name="password_confirmation"
+                                class="form-control form-control-custom">
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-save px-5">حفظ</button>
+                            <a href="{{ route('users.index') }}" class="btn btn-secondary px-5">رجوع</a>
+                        </div>
+                    </form>
+                </div>
+                @endif
+            </div>
+
+
             <div id="contact" class="page-section">
                 <h4 class="text-center mb-5 fw-bold">التواصل</h4>
                 <div class="row g-4 mx-auto" style="max-width: 800px;">
@@ -718,7 +846,8 @@
 
                 <div class="mx-auto" style="max-width: 800px;">
                     @forelse($messages as $message)
-                    <div class="message-item shadow-sm mb-3 p-3 bg-white rounded-4 d-flex justify-content-between align-items-center">
+                    <div
+                        class="message-item shadow-sm mb-3 p-3 bg-white rounded-4 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3 text-end">
                             <div class="user-avatar">
                                 <i class="bi bi-person-fill fs-3 text-white"></i>
@@ -738,7 +867,8 @@
                         </div>
 
                         <div class="d-flex gap-3 align-items-center">
-                            <form action="{{ route('dashboard.messages.delete', $message->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف الرسالة؟')">
+                            <form action="{{ route('dashboard.messages.delete', $message->id) }}" method="POST"
+                                onsubmit="return confirm('هل أنت متأكد من حذف الرسالة؟')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="border-0 bg-transparent p-0">
@@ -871,47 +1001,34 @@
             showPage('delegate-form');
             @elseif(isset($subsection) && $subsection == 'show-request')
             showPage('delegate1-form');
+            @elseif(isset($subsection) && $subsection == 'delegate-upload')
+            showPage('delegate-upload');
+            @elseif(isset($subsection) && $subsection == 'change-user-password')
+            showPage('change-user-password');
             @elseif(isset($section))
             showPage('{{ $section }}');
             @else
             showPage('dashboard');
             @endif
         });
+    </script>
+    <script>
+        function searchById() {
+            let input = document.getElementById('idSearch').value.trim();
+            let rows = document.querySelectorAll('#userTable tbody tr');
 
-        function showInstitutions() {
-            document.getElementById("institutionsSection").style.display = "block";
-            document.getElementById("addSection").style.display = "none";
-        }
+            rows.forEach(row => {
+                let id = row.getAttribute('data-id');
 
-        function showAddInstitution() {
-            document.getElementById("institutionsSection").style.display = "none";
-            document.getElementById("addSection").style.display = "block";
-        }
-
-        function deleteRow(btn) {
-            btn.closest("tr").remove();
-        }
-
-        document.getElementById('upload-logo')?.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('preview');
-                    const icon = document.querySelector('.logo1-box i');
-                    const text = document.querySelector('.logo1-box p');
-
-                    if (img) {
-                        img.src = e.target.result;
-                        img.style.display = 'block';
-                    }
-
-                    if (icon) icon.style.display = 'none';
-                    if (text) text.style.display = 'none';
+                if (!input) {
+                    row.style.display = '';
+                } else if (id && id.includes(input)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
-                reader.readAsDataURL(file);
-            }
-        });
+            });
+        }
     </script>
 </body>
 

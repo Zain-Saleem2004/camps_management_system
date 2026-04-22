@@ -5,6 +5,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CampController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\RepresentativeController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\DataEntryController;
 
 
 // Public صفحات
@@ -21,12 +24,22 @@ Route::prefix('dashboard')->group(function () {
 
     // Camps
     Route::resource('camps', CampController::class)->names('camps');
+    Route::get('/camps/{camp}/representative', [RepresentativeController::class, 'showByCamp'])
+        ->name('representatives.showByCamp');
 
     // Registration Requests
     Route::get('/requests', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/{id}', [RequestController::class, 'show'])->name('requests.show');
     Route::post('/requests/{id}/approve', [RequestController::class, 'approve'])->name('requests.approve');
     Route::post('/requests/{id}/reject', [RequestController::class, 'reject'])->name('requests.reject');
+
+    // Users
+    Route::get('/users', [DashboardController::class, 'usersIndex'])->name('users.index');
+    Route::get('/users/{user}/password', [UserController::class, 'passwordForm'])->name('users.password.form');
+    Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
+    Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::get('/data-entries/create', [DataEntryController::class, 'create'])->name('data-entries.create');
+    Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
 
     // Messages
     Route::get('/messages', [DashboardController::class, 'messagesIndex'])->name('messages.index');
