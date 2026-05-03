@@ -17,6 +17,7 @@ class Representative extends Model
     }
 
     protected $fillable = [
+        "user_id",
         'camp_id',
         'name',
         'email',

@@ -18,9 +18,16 @@ class Camp extends Model
 
     public $timestamps = false;
 
+    public function representatives()
+    {
+        return $this->hasMany(Representative::class);
+    }
+
     public function representative()
     {
-        return $this->hasOne(Representative::class);
+        return $this->hasOne(Representative::class)
+            ->where('status', 'active')
+            ->latestOfMany();
     }
 
     public function dataEntry()

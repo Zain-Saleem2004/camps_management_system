@@ -39,9 +39,14 @@ class User extends Authenticatable
         'phone',
     ];
 
+    public function representatives()
+    {
+        return $this->hasMany(Representative::class);
+    }
+
     public function representative()
     {
-        return $this->hasOne(Representative::class);
+        return $this->hasOne(Representative::class)->where('status', 'active');
     }
 
     public function dataEntry()

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Supporter;
 use App\Models\Message;
 use App\Models\RegistrationRequest;
+use App\Models\Communication;
 
 trait DashboardData
 {
@@ -20,7 +21,8 @@ trait DashboardData
             'dataEntriesCount' => User::where('role', 'data_entry')->count(),
             'supportersCount' => Supporter::count(),
             'messagesCount' => Message::count(),
-
+            'supporters' => Supporter::latest()->get(),
+            'communications' => Communication::pluck('value', 'name'),
             'messages' => Message::latest('created_at')->get(),
             'camps' => Camp::with('representative')->get(),
             'requests' => RegistrationRequest::latest('created_at')->get(),

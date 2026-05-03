@@ -38,14 +38,16 @@
             </a>
             <div class="nav-link" onclick="showPage('reports', this)"><i class="bi bi-file-earmark-bar-graph"></i>
                 التقارير</div>
-            <div class="nav-link" onclick="showPage('institutionsSection', this)"><i class="bi bi-building"></i>
-                المؤسسات</div>
+            <a href="{{ route('supporters.index') }}" class="nav-link {{ (($section ?? '') == 'institutionsSection') ? 'active' : '' }}">
+                <i class="bi bi-building"></i> المؤسسات
+            </a>
             <a href="{{ route('users.index') }}" class="nav-link {{ (($section ?? '') == 'users') ? 'active' : '' }}">
                 <i class="bi bi-person-check"></i> المستخدمين
             </a>
-            <div class="nav-link" onclick="showPage('contact', this)"><i class="bi bi-people"></i> التواصل</div>
-            <a href="{{ route('messages.index') }}"
-                class="nav-link {{ (($section ?? '') == 'messages' || ($section ?? '') == 'message-details') ? 'active' : '' }}">
+            <a href="{{ route('communications.edit') }}" class="nav-link {{ (($section ?? '') == 'contact') ? 'active' : '' }}">
+                <i class="bi bi-person-check"></i> التواصل
+            </a>
+            <a href="{{ route('messages.index') }}" class="nav-link {{ (($section ?? '') == 'messages' || ($section ?? '') == 'message-details') ? 'active' : '' }}">
                 <i class="bi bi-chat-dots"></i> الرسائل
             </a>
         </nav>
@@ -143,8 +145,12 @@
                                         <i class="bi bi-pencil-square text-secondary mx-1" style="cursor:pointer"></i>
                                     </a>
 
-                                    <i class="bi bi-shield-lock text-dark mx-1" style="cursor:pointer"
-                                        data-bs-toggle="modal" data-bs-target="#authModal"></i>
+                                    <a href="{{ route('representatives.replace.form', $camp->id) }}">
+                                        <i class="bi bi-person-arms-up text-dark mx-1" style="cursor:pointer" title="تبديل مندوب المخيم"></i>
+                                    </a>
+
+                                    <!-- <i class="bi bi-shield-lock text-dark mx-1" style="cursor:pointer"
+                                        data-bs-toggle="modal" data-bs-target="#authModal"></i> -->
 
                                     <a href="{{ route('representatives.showByCamp', $camp->id) }}">
                                         <i class="bi bi-bar-chart text-info mx-1" style="cursor:pointer"></i>
@@ -276,6 +282,71 @@
                 @endif
             </div>
 
+            <div id="replace-representative" class="page-section {{ (($subsection ?? '') == 'replace-representative') ? 'active' : '' }}">
+                <h4 class="text-center mb-5 fw-bold">تبديل مندوب المخيم</h4>
+
+                @if(isset($selectedCamp))
+                <div class="mx-auto" style="max-width: 800px;">
+                    <div class="alert alert-info text-center">
+                        المخيم: {{ $selectedCamp->name }}
+                        <br>
+                        المندوب الحالي: {{ $selectedCamp->representative?->name ?? 'لا يوجد مندوب' }}
+                    </div>
+
+                    <form action="{{ route('representatives.replace', $selectedCamp->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>اسم المندوب الجديد</label>
+                                <input type="text" name="name" class="form-control form-control-custom" value="{{ old('name') }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" name="email" class="form-control form-control-custom" value="{{ old('email') }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>كلمة المرور</label>
+                                <input type="password" name="password" class="form-control form-control-custom">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>الهاتف</label>
+                                <input type="text" name="phone" class="form-control form-control-custom" value="{{ old('phone') }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>الجنس</label>
+                                <select name="gender" class="form-select form-control-custom">
+                                    <option value="">اختر</option>
+                                    <option value="male">ذكر</option>
+                                    <option value="female">أنثى</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>رقم الهوية</label>
+                                <input type="text" name="national_id_no" class="form-control form-control-custom" value="{{ old('national_id_no') }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>المحافظة</label>
+                                <input type="text" name="governorate" class="form-control form-control-custom" value="{{ old('governorate') }}">
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-save">تبديل المندوب</button>
+                            <a href="{{ route('camps.index') }}" class="btn btn-secondary">رجوع</a>
+                        </div>
+                    </form>
+                </div>
+                @endif
+            </div>
+
             <div id="delegate-upload"
                 class="page-section {{ (($subsection ?? '') == 'delegate-upload') ? 'active' : '' }}">
                 @if(isset($representative))
@@ -286,15 +357,22 @@
                 @endif
 
                 <div class="form-container">
-                    <h4 class="form-title">تسجيل بيانات مندوب المخيم</h4>
+                    <h4 class="form-title">بيانات مندوب المخيم</h4>
 
-                    <form id="registrationForm">
+                    @if(session('success'))
+                    <div class="alert alert-success text-center">{{ session('success') }}</div>
+                    @endif
+
+                    @if($representative)
+                    <form action="{{ route('representatives.update', $representative->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        @endif
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>الاسم</label>
-                                    <input type="text" class="form-control" value="{{ $representative->name ?? '' }}"
-                                        readonly>
+                                    <input type="text" name="name" class="form-control" value="{{ old('name', $representative->name ?? '') }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -305,9 +383,44 @@
                                         <option value="male">ذكر</option>
                                         <option value="female">أنثى</option>
                                     </select> -->
-                                    <select class="form-select" disabled>
-                                        <option>{{ $representative->gender ?? '---' }}</option>
+                                    <select name="gender" class="form-select">
+                                        <option value="male" {{ ($representative->gender ?? '') == 'male' ? 'selected' : '' }}>ذكر</option>
+                                        <option value="female" {{ ($representative->gender ?? '') == 'female' ? 'selected' : '' }}>أنثى</option>
                                     </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>رقم الهوية</label>
+                                    <input type="text" name="national_id_no" class="form-control" value="{{ old('national_id_no', $representative->national_id_no ?? '') }}">
+                                    <!-- <input type="text" class="form-control"> -->
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>الهاتف</label>
+                                    <div class="input-group">
+                                        <input type="text" name="phone" class="form-control" value="{{ old('phone', $representative->phone ?? '') }}">
+                                        <!-- <input type="number" class="form-control"> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>البريد الالكتروني</label>
+                                    <input type="email" name="email" class="form-control" value="{{ old('email', $representative->email ?? '') }}">
+                                    <!-- <input type="email" class="form-control"> -->
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>المحافظة</label>
+                                    <input type="text" name="governorate" class="form-control" value="{{ old('governorate', $representative->governorate ?? '') }}">
+                                    <!-- <input type="email" class="form-control"> -->
                                 </div>
                             </div>
 
@@ -323,33 +436,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label>رقم الهوية</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ $representative->national_id_no ?? '' }}" readonly>
-                                    <!-- <input type="text" class="form-control"> -->
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label>الهاتف</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"
-                                            value="{{ $representative->phone ?? '' }}" readonly>
-                                        <!-- <input type="number" class="form-control"> -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label>البريد الالكتروني</label>
-                                    <input type="text" class="form-control" value="{{ $representative->email ?? '' }}"
-                                        readonly>
-                                    <!-- <input type="email" class="form-control"> -->
-                                </div>
-                            </div>
 
                             <div class="col-md-6 ">
                                 <div class="form-group-custom">
@@ -363,7 +449,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6"></div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label>ارفاق ورقة الاعتماد</label>
@@ -379,13 +464,15 @@
                         </div>
 
                         <div class="text-center mt-4">
-                            <a href="{{ route('camps.index') }}" class="btn btn-save">رجوع</a>
+                            @if($representative)
+                            <button type="submit" class="btn btn-save">حفظ التعديلات</button>
+                            @endif
+
+                            <a href="{{ route('camps.index') }}" class="btn btn-secondary">رجوع</a>
                         </div>
                     </form>
                 </div>
                 @endif
-
-
             </div>
 
             <div id="requests"
@@ -399,6 +486,7 @@
                                 <th>اسم المخيم</th>
                                 <th>اسم مندوب المخيم</th>
                                 <th>تاريخ الطلب</th>
+                                <th>الحالة</th>
                                 <th>العملية</th>
                             </tr>
                         </thead>
@@ -409,6 +497,7 @@
                                 <td>{{ $request->camp_name }}</td>
                                 <td>{{ $request->rep_name }}</td>
                                 <td>{{ \Carbon\Carbon::parse($request->created_at)->format('Y-m-d') }}</td>
+                                <td>{{ $request->status }}</td>
                                 <td>
                                     <a href="{{ route('requests.show', $request->id) }}">
                                         <i class="bi bi-eye text-primary fs-5" style="cursor:pointer"></i>
@@ -426,6 +515,17 @@
             </div>
 
             <div id="delegate1-form" class="page-section {{ (($subsection ?? '') == 'show-request') ? 'active' : '' }}">
+                @if(session('success'))
+                <div class="alert alert-success text-center">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="alert alert-danger text-center">
+                    {{ session('error') }}
+                </div>
+                @endif
                 @if(isset($selectedRequest))
                 <div id="request" class="page">
                     <div class="card-box">
@@ -497,18 +597,37 @@
                                     style="border-radius: 19px; margin-top: 10px;">
                             </div>
 
-                            <div class="col-12 text-start mt-4">
-                                @if($selectedRequest->verification_img_path)
-                                <p><strong>ملف التحقق:</strong> {{ $selectedRequest->verification_img_path }}</p>
-                                @endif
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3">المرفقات</h5>
 
-                                @if($selectedRequest->national_id_img_path)
-                                <p><strong>صورة الهوية:</strong> {{ $selectedRequest->national_id_img_path }}</p>
-                                @endif
+                                <div class="row g-3">
+                                    @if($selectedRequest->verification_img_path)
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>ملف التحقق</strong></p>
+                                        <img src="{{ asset('storage/' . $selectedRequest->verification_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                    </div>
+                                    @endif
 
-                                @if($selectedRequest->personal_img_path)
-                                <p><strong>الصورة الشخصية:</strong> {{ $selectedRequest->personal_img_path }}</p>
-                                @endif
+                                    @if($selectedRequest->national_id_img_path)
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>صورة الهوية</strong></p>
+                                        <img src="{{ asset('storage/' . $selectedRequest->national_id_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                    </div>
+                                    @endif
+
+                                    @if($selectedRequest->personal_img_path)
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>الصورة الشخصية</strong></p>
+                                        <img src="{{ asset('storage/' . $selectedRequest->personal_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                    </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -543,116 +662,164 @@
 
             <div id="institutionsSection" class="page-section">
                 <h4 class="text-center mb-4 fw-bold">المؤسسات</h4>
+
+                @if(session('success'))
+                <div class="alert alert-success text-center mx-auto" style="max-width: 800px;">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                <div class="text-center mb-4">
+                    <a href="{{ route('supporters.create') }}" class="btn btn-save">
+                        إضافة مؤسسة
+                    </a>
+                </div>
+
                 <div class="custom-table table-responsive">
                     <table class="table text-center align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>اسم </th>
+                                <th>الاسم</th>
                                 <th>رقم الهاتف</th>
                                 <th>البريد الالكتروني</th>
+                                <th>مجال الدعم</th>
                                 <th>العملية</th>
-
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($supporters ?? [] as $supporter)
                             <tr>
-                                <td>1</td>
-                                <td>مؤسسة الخير</td>
-
-                                <td></td>
-                                <td></td>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $supporter->name }}</td>
+                                <td>{{ $supporter->phone ?? '---' }}</td>
+                                <td>{{ $supporter->email ?? '---' }}</td>
+                                <td>{{ $supporter->aid_sector ?? '---' }}</td>
                                 <td>
-                                    <i class="fa-solid fa-eye" onclick="showAddInstitution()"
-                                        style="color: #3a2d87;"></i>
-                                    <i class="fa-solid fa-trash" onclick="deleteRow(this)" style="color: #3a2d87;"></i>
+                                    <a href="{{ route('supporters.show', $supporter->id) }}">
+                                        <i class="fa-solid fa-eye mx-2" style="color: #3a2d87; cursor:pointer;"></i>
+                                    </a>
+                                    <a href="{{ route('supporters.edit', $supporter->id) }}">
+                                        <i class="fa-solid fa-pen-to-square mx-2" style="color: #3a2d87; cursor:pointer;"></i>
+                                    </a>
+
+                                    <form action="{{ route('supporters.destroy', $supporter->id) }}" method="POST" class="d-inline"
+                                        onsubmit="return confirm('هل أنت متأكد من حذف هذه المؤسسة؟')">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit" class="border-0 bg-transparent p-0">
+                                            <i class="fa-solid fa-trash mx-2" style="color: #3a2d87; cursor:pointer;"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>2</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td colspan="6">لا توجد مؤسسات</td>
                             </tr>
-                            <tr>
-                                <td>3</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div id="addSection" class="box" style="display:none;">
+            <div id="supporter-details" class="page-section {{ (($subsection ?? '') == 'show-supporter') ? 'active' : '' }}">
+                <h4 class="text-center mb-5 fw-bold">تفاصيل المؤسسة</h4>
+
+                @if(isset($selectedSupporter))
+                <div class="bg-white p-5 rounded-4 shadow-sm mx-auto text-start"
+                    style="max-width: 800px; line-height: 2;">
+
+                    <p><strong>الاسم:</strong> {{ $selectedSupporter->name }}</p>
+                    <p><strong>رقم الهاتف:</strong> {{ $selectedSupporter->phone ?? '---' }}</p>
+                    <p><strong>البريد الإلكتروني:</strong> {{ $selectedSupporter->email ?? '---' }}</p>
+                    <p><strong>رابط الموقع:</strong> {{ $selectedSupporter->website_link ?? '---' }}</p>
+                    <p><strong>مجال الدعم:</strong> {{ $selectedSupporter->aid_sector ?? '---' }}</p>
+                    <p><strong>الشروط:</strong></p>
+                    <p class="text-muted">{{ $selectedSupporter->terms ?? '---' }}</p>
+                    <p><strong>عن المؤسسة:</strong></p>
+                    <p class="text-muted">{{ $selectedSupporter->about ?? '---' }}</p>
+
+                    @if($selectedSupporter->logo_path)
+                    <div class="text-center my-4">
+                        <img src="{{ asset('storage/' . $selectedSupporter->logo_path) }}"
+                            alt="logo"
+                            style="max-width: 180px; max-height: 180px; object-fit: contain;">
+                    </div>
+                    @endif
+
+                    <div class="text-center mt-5">
+                        <a href="{{ route('supporters.index') }}" class="btn btn-purple px-5"
+                            style="background-color: #3a2d87; border-radius: 19px; color:white;">
+                            إغلاق
+                        </a>
+                    </div>
+                </div>
+                @endif
+            </div>
+            <div id="addSection" class="page-section {{ (($subsection ?? '') == 'add-supporter') ? 'active' : '' }}">
                 <div class="content">
                     <div class="form-card mx-auto" style="max-width: 1000px;">
                         <h4 class="text-center fw-bold mb-5">إضافة مؤسسة</h4>
 
-                        <form>
+                        @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        <form action="{{ route('supporters.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+
                             <div class="row">
                                 <div class="col-md-7">
                                     <div class="field-group">
                                         <label>الإسم</label>
-                                        <input type="text" class="input-style">
+                                        <input type="text" name="name" class="input-style" value="{{ old('name') }}">
                                     </div>
+
                                     <div class="field-group">
                                         <label>البريد الالكتروني</label>
-                                        <input type="email" class="input-style">
+                                        <input type="email" name="email" class="input-style" value="{{ old('email') }}">
                                     </div>
+
                                     <div class="field-group">
-                                        <label>المحافظة</label>
-                                        <input type="text" class="input-style">
+                                        <label>مجال الدعم</label>
+                                        <input type="text" name="aid_sector" class="input-style" value="{{ old('aid_sector') }}">
                                     </div>
+
                                     <div class="field-group">
                                         <label>رابط الموقع</label>
-                                        <input type="url" class="input-style">
+                                        <input type="url" name="website_link" class="input-style" value="{{ old('website_link') }}">
                                     </div>
+
                                     <div class="field-group align-items-start">
                                         <label class="pt-2">الشروط</label>
-                                        <textarea class="textarea-style"></textarea>
+                                        <textarea name="terms" class="textarea-style">{{ old('terms') }}</textarea>
                                     </div>
+
                                     <div class="field-group align-items-start mt-3">
                                         <label class="pt-2">عن المؤسسة</label>
-                                        <textarea class="textarea-style"></textarea>
+                                        <textarea name="about" class="textarea-style">{{ old('about') }}</textarea>
                                     </div>
                                 </div>
 
                                 <div class="col-md-5">
                                     <div class="field-group">
                                         <label>رقم الهاتف</label>
-                                        <input type="text" class="input-style">
+                                        <input type="text" name="phone" class="input-style" value="{{ old('phone') }}">
                                     </div>
-                                    <div class="field-group">
-                                        <label>العنوان</label>
-                                        <input type="text" class="input-style">
-                                    </div>
+
                                     <div class="field-group align-items-start">
                                         <label class="pt-2">الشعار</label>
                                         <div class="logo1-box">
                                             <i class="bi bi-file-earmark-arrow-up"></i>
                                             <p>إرفاق</p>
-                                            <input type="file" id="upload-logo">
+                                            <input type="file" name="logo" id="upload-logo">
                                             <img id="preview"
                                                 style="display:none; width:100%; height:100%; object-fit:contain; border-radius:20px;">
                                         </div>
@@ -660,13 +827,84 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-save">حفظ</button>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn-save">حفظ</button>
+                                <a href="{{ route('supporters.index') }}" class="btn btn-secondary">رجوع</a>
+                            </div>
                         </form>
                     </div>
                 </div>
+            </div>
 
+            <div id="editSupporterSection" class="page-section {{ (($subsection ?? '') == 'edit-supporter') ? 'active' : '' }}">
+                <div class="content">
+                    <div class="form-card mx-auto" style="max-width: 1000px;">
+                        <h4 class="text-center fw-bold mb-5">تعديل مؤسسة</h4>
 
+                        @if(isset($selectedSupporter))
+                        <form action="{{ route('supporters.update', $selectedSupporter->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
 
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="field-group">
+                                        <label>الإسم</label>
+                                        <input type="text" name="name" class="input-style" value="{{ old('name', $selectedSupporter->name) }}">
+                                    </div>
+
+                                    <div class="field-group">
+                                        <label>البريد الالكتروني</label>
+                                        <input type="email" name="email" class="input-style" value="{{ old('email', $selectedSupporter->email) }}">
+                                    </div>
+
+                                    <div class="field-group">
+                                        <label>مجال الدعم</label>
+                                        <input type="text" name="aid_sector" class="input-style" value="{{ old('aid_sector', $selectedSupporter->aid_sector) }}">
+                                    </div>
+
+                                    <div class="field-group">
+                                        <label>رابط الموقع</label>
+                                        <input type="url" name="website_link" class="input-style" value="{{ old('website_link', $selectedSupporter->website_link) }}">
+                                    </div>
+
+                                    <div class="field-group align-items-start">
+                                        <label class="pt-2">الشروط</label>
+                                        <textarea name="terms" class="textarea-style">{{ old('terms', $selectedSupporter->terms) }}</textarea>
+                                    </div>
+
+                                    <div class="field-group align-items-start mt-3">
+                                        <label class="pt-2">عن المؤسسة</label>
+                                        <textarea name="about" class="textarea-style">{{ old('about', $selectedSupporter->about) }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="field-group">
+                                        <label>رقم الهاتف</label>
+                                        <input type="text" name="phone" class="input-style" value="{{ old('phone', $selectedSupporter->phone) }}">
+                                    </div>
+
+                                    <div class="field-group align-items-start">
+                                        <label class="pt-2">الشعار</label>
+                                        <input type="file" name="logo" class="form-control">
+
+                                        @if($selectedSupporter->logo_path)
+                                        <img src="{{ asset('storage/' . $selectedSupporter->logo_path) }}"
+                                            style="max-width:150px; margin-top:15px;">
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn-save">حفظ التعديلات</button>
+                                <a href="{{ route('supporters.index') }}" class="btn btn-secondary">رجوع</a>
+                            </div>
+                        </form>
+                        @endif
+                    </div>
+                </div>
             </div>
 
 
@@ -796,22 +1034,57 @@
 
             <div id="contact" class="page-section">
                 <h4 class="text-center mb-5 fw-bold">التواصل</h4>
-                <div class="row g-4 mx-auto" style="max-width: 800px;">
-                    <div class="col-md-6"><label>البريد الالكتروني</label><input type="text"
-                            class="form-control form-control-custom m-t-4"></div>
-                    <div class="col-md-6"><label>واتساب</label><input type="text"
-                            class="form-control form-control-custom m-t-4"></div>
-                    <div class="col-md-6"><label>لينكدإن</label><input type="text"
-                            class="form-control form-control-custom m-t-4"></div>
-                    <div class="col-md-6"><label>الهاتف</label><input type="text"
-                            class="form-control form-control-custom m-t-4"></div>
-                    <div class="col-md-12 text-center">
-                        <div style="max-width: 385px; margin: auto;"><label>فيسبوك</label><input type="text"
-                                class="form-control form-control-custom m-t-4"></div>
-                    </div>
+
+                @if(session('success'))
+                <div class="alert alert-success text-center mx-auto" style="max-width: 800px;">
+                    {{ session('success') }}
                 </div>
-                <div class="text-center mt-4"><button class="btn btn-save">حفظ</button></div>
+                @endif
+
+                <form action="{{ route('communications.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="row g-4 mx-auto" style="max-width: 800px;">
+                        <div class="col-md-6">
+                            <label>البريد الالكتروني</label>
+                            <input type="text" name="email" class="form-control form-control-custom m-t-4"
+                                value="{{ old('email', $communications['email'] ?? '') }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>واتساب</label>
+                            <input type="text" name="whatsapp" class="form-control form-control-custom m-t-4"
+                                value="{{ old('whatsapp', $communications['whatsapp'] ?? '') }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>لينكدإن</label>
+                            <input type="text" name="linkedin" class="form-control form-control-custom m-t-4"
+                                value="{{ old('linkedin', $communications['linkedin'] ?? '') }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>الهاتف</label>
+                            <input type="text" name="phone" class="form-control form-control-custom m-t-4"
+                                value="{{ old('phone', $communications['phone'] ?? '') }}">
+                        </div>
+
+                        <div class="col-md-12 text-center">
+                            <div style="max-width: 385px; margin: auto;">
+                                <label>فيسبوك</label>
+                                <input type="text" name="facebook" class="form-control form-control-custom m-t-4"
+                                    value="{{ old('facebook', $communications['facebook'] ?? '') }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-save">حفظ</button>
+                    </div>
+                </form>
             </div>
+
             <div id="reports" class="page-section text-center">
                 <h4 class="mb-5 fw-bold">التقارير</h4>
                 <div class="mx-auto" style="max-width: 400px;">
@@ -918,7 +1191,7 @@
         </div>
 
 
-        <footer class="pt-4 pb-3 " style="background: rgba(58, 45, 135, 0.11); border-radius: 19px;">
+        <!-- <footer class="pt-4 pb-3 " style="background: rgba(58, 45, 135, 0.11); border-radius: 19px;">
             <div class="container-fluid">
 
                 <a class="navbar-brand d-flex align-items-center gap-2" href="الصفحة الرئيسية.html">
@@ -955,7 +1228,7 @@
                 </div>
             </div>
     </div>
-    </footer>
+    </footer> -->
     </div>
 
     <div class="modal fade" id="authModal" tabindex="-1">
@@ -1003,8 +1276,16 @@
             showPage('delegate1-form');
             @elseif(isset($subsection) && $subsection == 'delegate-upload')
             showPage('delegate-upload');
+            @elseif(isset($subsection) && $subsection == 'replace-representative')
+            showPage('replace-representative');
             @elseif(isset($subsection) && $subsection == 'change-user-password')
             showPage('change-user-password');
+            @elseif(isset($subsection) && $subsection == 'show-supporter')
+            showPage('supporter-details');
+            @elseif(isset($subsection) && $subsection == 'edit-supporter')
+            showPage('editSupporterSection');
+            @elseif(isset($subsection) && $subsection == 'add-supporter')
+            showPage('addSection');
             @elseif(isset($section))
             showPage('{{ $section }}');
             @else

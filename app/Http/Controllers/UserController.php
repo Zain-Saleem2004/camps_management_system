@@ -68,7 +68,7 @@ class UserController extends Controller
                 'is_active' => $newIsActive,
             ]);
 
-            if ($user->role === 'data_entry' && $user->data_entry) {
+            if ($user->role === 'representative' && $user->representative) {
                 $user->representative->update([
                     'status' => $newIsActive ? 'active' : 'inactive',
                 ]);
