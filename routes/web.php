@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DataEntryController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\SupporterController;
+use App\Http\Controllers\JoinRequestController;
 
 
 // Public صفحات
@@ -19,6 +20,8 @@ Route::view('/join', 'join')->name('join');
 Route::view('/signin', 'public/signin')->name('signin');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/join', [JoinRequestController::class, 'create'])->name('join');
+Route::post('/join', [JoinRequestController::class, 'store'])->name('join.store');
 
 // Dashboard
 Route::prefix('dashboard')->group(function () {
