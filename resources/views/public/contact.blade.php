@@ -126,7 +126,7 @@
             </ul>
           </div>
           @endif
-          
+
           <form class="contact-form" method="POST" action="{{ route('contact.store') }}">
             @csrf
 
@@ -188,12 +188,12 @@
         <div class="container py-4">
           <div class="row g-4">
             <div class="col-md-6">
-              <p>📍 الموقع :غزة – فلسطين</p>
-              <p>✉ البريد الالكتروني : info@campflow.org</p>
+              <p>📍 الموقع : غزة – فلسطين</p>
+              <p>✉ البريد الالكتروني : {{ $communications['email'] ?? 'info@campflow.org' }}</p>
             </div>
 
             <div class="col-md-6 text-md-start">
-              <p>📞 رقم التواصل : +970-000-000</p>
+              <p>📞 رقم التواصل : {{ $communications['phone'] ?? '+970-000-000' }}</p>
               <p>⏰ ساعات العمل: 4:00 – 9:00</p>
             </div>
           </div>
@@ -201,10 +201,36 @@
           <div
             class="d-flex gap-5">
             <div class="d-flex gap-3">
-              <a href="#" class="text-dark"><i class="fab fa-facebook fa-lg"></i></a>
-              <a href="#" class="text-dark"><i class="fab fa-linkedin fa-lg"></i></a>
-              <a href="#" class="text-dark"><i class="fab fa-envelope fa-lg"></i></a>
-              <a href="#" class="text-dark"><i class="fab fa-instagram fa-lg"></i></a>
+              @php use Illuminate\Support\Str; @endphp
+
+              <a href="{{ Str::startsWith($communications['facebook'] ?? '', ['http://', 'https://']) 
+                ? $communications['facebook'] 
+                : 'https://' . ($communications['facebook'] ?? '#') }}"
+                class="text-dark"
+                target="_blank">
+
+                <i class="fab fa-facebook fa-lg"></i>
+              </a>
+
+
+              <a href="{{ Str::startsWith($communications['linkedin'] ?? '', ['http://', 'https://']) ? $communications['linkedin'] : 'https://' . ($communications['linkedin'] ?? '#') }}"
+                class="text-dark"
+                target="_blank">
+                <i class="fab fa-linkedin fa-lg"></i>
+              </a>
+
+              <a href="mailto:{{ $communications['email'] ?? 'info@campflow.org' }}" class="text-dark">
+                <i class="fab fa-envelope fa-lg"></i>
+              </a>
+
+              <a href="{{ Str::startsWith($communications['whatsapp'] ?? '', ['http://', 'https://']) 
+                ? $communications['whatsapp'] 
+                : 'https://' . ($communications['whatsapp'] ?? '#') }}"
+                class="text-dark"
+                target="_blank">
+
+                <i class="fab fa-whatsapp fa-lg"></i>
+              </a>
             </div>
             <span class="mb-2 mb-md-0" style=text-align:center> 2025All Rights Reserved ©</span>
 

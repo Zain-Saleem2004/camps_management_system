@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'الرئيسية')
+@section('title', 'لوحة تحكم الادمن')
 
 @section('content')
 <!DOCTYPE html>
@@ -57,11 +57,30 @@
     <div class="main-wrapper">
 
         <div class="top-bar">
-            <div class="user-name small fw-bold">محمد سلمان : مدخل بيانات</div>
+            <div class="user-name small fw-bold">
+                {{ auth()->user()->name ?? 'مستخدم' }} :
+                @if(auth()->user()?->role === 'admin')
+                Administrator
+                @elseif(auth()->user()?->role === 'representative')
+                Representative
+                @elseif(auth()->user()?->role === 'data_entry')
+                Data Entry
+                @else
+                User
+
+                @endif
+            </div>
             <div class="d-flex align-items-center">
 
-                <a href="{{ route('home') }}" class="logout-link small">تسجيل الخروج</a>
-                <i class="fa-solid fa-gear text-muted" style="cursor:pointer"></i>
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="logout-link small border-0">
+                        تسجيل الخروج
+                    </button>
+                </form>
+                <a href="{{ route('users.password.form', auth()->id()) }}">
+                    <i class="fa-solid fa-gear text-muted" style="cursor:pointer"></i>
+                </a>
             </div>
         </div>
 
@@ -424,40 +443,41 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label>ارفاق الهوية</label>
-                                    <div class="file-input-wrapper">
-                                        <input type="file" class="file-input-real">
-                                        <div class="file-display">
-                                            <i class="bi bi-paperclip"></i>
-                                            <span class="file-name text-muted"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3">المرفقات</h5>
 
-                            <div class="col-md-6 ">
-                                <div class="form-group-custom">
-                                    <label>ارفاق صورة شخصية</label>
-                                    <div class="file-input-wrapper">
-                                        <input type="file" class="file-input-real">
-                                        <div class="file-display">
-                                            <i class="bi bi-paperclip"></i>
-                                            <span class="file-name text-muted"></span>
-                                        </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>صورة الهوية</strong></p>
+                                        @if($representative->national_id_img_path)
+                                        <img src="{{ asset('storage/' . $representative->national_id_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                        @else
+                                        <span class="text-muted">لا يوجد ملف</span>
+                                        @endif
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label>ارفاق ورقة الاعتماد</label>
-                                    <div class="file-input-wrapper">
-                                        <input type="file" class="file-input-real">
-                                        <div class="file-display">
-                                            <i class="bi bi-paperclip"></i>
-                                            <span class="file-name text-muted"></span>
-                                        </div>
+
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>الصورة الشخصية</strong></p>
+                                        @if($representative->personal_img_path)
+                                        <img src="{{ asset('storage/' . $representative->personal_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                        @else
+                                        <span class="text-muted">لا يوجد ملف</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="col-md-4 text-center">
+                                        <p><strong>ورقة الاعتماد</strong></p>
+                                        @if($representative->verification_img_path)
+                                        <img src="{{ asset('storage/' . $representative->verification_img_path) }}"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: contain;">
+                                        @else
+                                        <span class="text-muted">لا يوجد ملف</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

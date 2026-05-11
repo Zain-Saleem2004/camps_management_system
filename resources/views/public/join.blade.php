@@ -205,11 +205,9 @@
 <body>
 
     <header class="header-bar">
-        <div class="user">محمد سلمان : مدخل بيانات</div>
+
         <div class="d-flex align-items-center gap-3">
-            <a href="الصفحة الرئيسية.html" class="logout-link small">تسجيل الخروج</a>
-            <i class="fa-solid fa-gear text-muted" style="cursor:pointer" data-bs-toggle="modal"
-                data-bs-target="#pwModal"></i>
+            <a href="{{ route('home') }}" class="logout-link small">الرجوع</a>
         </div>
     </header>
 
@@ -339,7 +337,7 @@
 
         <div class="image-side ">
             <img src="{{ asset('assets/images/img1 (4).jpeg') }}" alt="UI Image">
-<!-- IMAGE/img1 (4).jpeg -->
+            <!-- IMAGE/img1 (4).jpeg -->
         </div>
     </div>
 
@@ -364,32 +362,62 @@
     <footer class="pt-4 pb-3 " style="background: rgba(58, 45, 135, 0.11); border-radius: 19px;">
         <div class="container-fluid">
 
-            <a class="navbar-brand d-flex align-items-center gap-2" href="الصفحة الرئيسية.html">
-                <img src="IMAGE/img1__5_-removebg-preview (1).png" width="60" />
+            <a
+                class="navbar-brand d-flex align-items-center gap-2"
+                href="{{ route('home') }}">
+                <img src="{{ asset('assets/images/img1__5_-removebg-preview (1).png') }}" width="60" />
                 <h3>خيمتي</h3>
             </a>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div
+                class="d-flex justify-content-between align-items-center flex-wrap">
 
                 <div class="container py-4">
                     <div class="row g-4">
-                        <div class="col-md-6 text-md-start">
-                            <p>📍 الموقع :غزة – فلسطين</p>
-                            <p>✉ البريد الالكتروني : info@campflow.org</p>
+                        <div class="col-md-6">
+                            <p>📍 الموقع : غزة – فلسطين</p>
+                            <p>✉ البريد الالكتروني : {{ $communications['email'] ?? 'info@campflow.org' }}</p>
                         </div>
 
                         <div class="col-md-6 text-md-start">
-                            <p>📞 رقم التواصل : +970-000-000</p>
+                            <p>📞 رقم التواصل : {{ $communications['phone'] ?? '+970-000-000' }}</p>
                             <p>⏰ ساعات العمل: 4:00 – 9:00</p>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-5">
+                    <div
+                        class="d-flex gap-5">
                         <div class="d-flex gap-3">
-                            <a href="#" class="text-dark"><i class="fab fa-facebook fa-lg"></i></a>
-                            <a href="#" class="text-dark"><i class="fab fa-linkedin fa-lg"></i></a>
-                            <a href="#" class="text-dark"><i class="fab fa-envelope fa-lg"></i></a>
-                            <a href="#" class="text-dark"><i class="fab fa-instagram fa-lg"></i></a>
+                            @php use Illuminate\Support\Str; @endphp
+
+                            <a href="{{ Str::startsWith($communications['facebook'] ?? '', ['http://', 'https://']) 
+                ? $communications['facebook'] 
+                : 'https://' . ($communications['facebook'] ?? '#') }}"
+                                class="text-dark"
+                                target="_blank">
+
+                                <i class="fab fa-facebook fa-lg"></i>
+                            </a>
+
+
+                            <a href="{{ Str::startsWith($communications['linkedin'] ?? '', ['http://', 'https://']) ? $communications['linkedin'] : 'https://' . ($communications['linkedin'] ?? '#') }}"
+                                class="text-dark"
+                                target="_blank">
+                                <i class="fab fa-linkedin fa-lg"></i>
+                            </a>
+
+                            <a href="mailto:{{ $communications['email'] ?? 'info@campflow.org' }}" class="text-dark">
+                                <i class="fab fa-envelope fa-lg"></i>
+                            </a>
+
+                            <a href="{{ Str::startsWith($communications['whatsapp'] ?? '', ['http://', 'https://']) 
+                ? $communications['whatsapp'] 
+                : 'https://' . ($communications['whatsapp'] ?? '#') }}"
+                                class="text-dark"
+                                target="_blank">
+
+                                <i class="fab fa-whatsapp fa-lg"></i>
+                            </a>
                         </div>
                         <span class="mb-2 mb-md-0" style=text-align:center> 2025All Rights Reserved ©</span>
 
